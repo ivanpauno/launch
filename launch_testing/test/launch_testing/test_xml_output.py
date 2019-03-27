@@ -42,7 +42,7 @@ class TestGoodXmlOutput(unittest.TestCase):
 
         assert 0 == subprocess.run(
             args=[
-                'launchtest',
+                'launch_test',
                 path,
                 '--junit-xml', os.path.join(cls.tmpdir.name, 'junit.xml'),
             ],
