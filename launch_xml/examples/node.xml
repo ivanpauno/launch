@@ -1,0 +1,10 @@
+<node name="my_node" package="demo_nodes_cpp" executable="talker" output="log" ns="ns" args="--asd --bsd" prefix="time">
+    <param name="a">
+        <param name="b" value="5"/>
+        <param name="c" value="4"/>
+    </param>
+    <param name="b" value="stuff"/>
+    <param name="c" value="1,2,3" sep=","/>
+    <remap from="chatter" to="my_chatter"/>
+    <!-- <env name="var" value="1"/> -->
+</node>
