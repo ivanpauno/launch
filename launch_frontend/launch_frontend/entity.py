@@ -23,28 +23,20 @@ from typing import Text
 class Entity:
     """Single item in the intermediate front_end representation."""
 
-    def __init__(self, *,
-                 type_name: Text = None,
-                 parent: Optional['Entity'] = None) -> Text:
-        """Construnctor."""
-        self.__type_name = type_name
-        self.__parent = parent
-        self.__children = None
-
     @property
     def type_name(self) -> Text:
         """Get Entity type."""
-        return self.__type_name
+        raise NotImplementedError()
 
     @property
     def parent(self) -> Optional['Entity']:
         """Get Entity parent."""
-        return self.__parent
+        raise NotImplementedError()
 
     @property
     def children(self) -> Optional[List['Entity']]:
         """Get Entity children."""
-        return self.__children
+        raise NotImplementedError()
 
     def __getattr__(self, name: Text) -> Optional[Any]:
         """Get attribute."""

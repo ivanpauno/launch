@@ -4,7 +4,7 @@
   <name>launch_xml</name>
   <version>0.7.3</version>
   <description>The ROS launch XML frontend.</description>
-  <maintainer email="dthomas@osrfoundation.org">Dirk Thomas</maintainer>
+  <maintainer email="ivanpauno@ekumenlabs.com">Ivan Paunovic</maintainer>
   <license>Apache License 2.0</license>
 
   <depend>launch</depend>

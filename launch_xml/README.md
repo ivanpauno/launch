@@ -19,10 +19,10 @@ e.attr == '2'
 ```
 
 As a general rule, the value of the attribute is returned as an string.
-Conversion to `float` or `int` should be explicitly done in the parser method, or in a substitution.
+Conversion to `float` or `int` should be explicitly done in the parser method.
 For handling lists, see `Built-in Substitutions` section.
 
-### Accessing XML children that aren't an action or a substitution:
+### Accessing XML children as parameters:
 
 In this xml:
 
@@ -45,48 +45,22 @@ e.env[1].value == 'stuff'
 
 In these cases, `e.env` is a list of entity, which could be accessed in the same abstract way.
 
-### Accessing XML children that are an action or a substitution:
+### Accessing all the XML children:
 
-The entity will keep track of which `children` where accessed or not.
-The ones which have never been accessed, will be returned when doing:
+The children can be directly accessed:
 
 ```python
 e.children
 ```
 
-This call should be done after all the children that shouldn't be parsed have been accessed.
+It returns a list of launch_xml.Entity wrapping each of the xml children.
 
 ### Built-in substitutions
+
+See [this](https://github.com/ros2/design/blob/d3a35d7ea201721892993e85e28a5a223cdaa001/articles/151_roslaunch_xml.md) document.
+
+Additional substitution, for handling lists:
 
 `$(list [sep=,] a,b,c,d)`
 : Substituted by a python list, splited by the separator that follows `sep=`.
   Default separator is `,`.
-
-`$(int 3)`
-: Substituted by a python int.
-
-`$(float 3)`
-: Substituted by a python float.
-
-`$(find-pkg pkg-name)`
-: Substituted by the path to package installation directory in the local filesystem.
-  Forward and backwards slashes will be resolved to the local filesystem convention.
-  Substitution will fail if the package cannot be found.
-
-`$(find-exec exec-name)`
-: Substituted by the path to the executable in the local filesystem.
-  Lookups make use of the PATH environment variable.
-  Forward and backwards slashes will be resolved to the local filesystem convention.
-  Substitution will fail if the executable cannot be found.
-
-`$(var name)`
-: Substituted by the value of the launch configuration variable.
-  Substitution will fail if the named argument does not exist.
-
-`$(env env-var [default-value])`
-: Substituted by the value of the given environment variable
-  Substitution will fail if the variable is not set, unless default values are provided.
-
-`$(dirname)`
-: Substituted by the current launch file directory name.
-  Substitution will always succeed.

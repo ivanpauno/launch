@@ -27,32 +27,20 @@ class Entity(launch_frontend.Entity):
         """Construnctor."""
         super().__init__(**kwargs)
         self.__xml_element = xml_element
-        self.__children = [child for child in xml_element]
-        self.__attributes = xml_element.attrib
 
     def __getattr__(self, name):
         """Abstraction of how to access the xml tree."""
         if name in self.__attributes:
-            if name == 'value' and self.__type_name == 'param':
-                if 'sep' in self.__attributes:
-                    sep = self.__attributes['sep']
-                    return self.__attributes['value'].split(sep)
             return self.__attributes[name]
-        remaining_children = []
         return_list = []
-        for child in self.__children:
+        for child in self.__xml_element:
             if child.tag == name:
                 return_list.append(
                     Entity(child,
                            type_name=child.tag,
                            parent=self.__xml_element))
-            else:
-                remaining_children.append(child)
         if not return_list:
             raise AttributeError(
                 'Can not find attribute {} in Entity {}'.format(
                     name, self.__type_name))
-        self.__children = remaining_children
-        # if len(return_list) == 1:
-        #     return return_list[0]
         return return_list

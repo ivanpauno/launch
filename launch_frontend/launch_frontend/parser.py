@@ -21,19 +21,6 @@ import launch_ros
 from .entity import Entity
 
 
-def get_attr_or_default(entity, attr, default_value):
-    """Return the attr value of entity or default_value."""
-    try:
-        return entity.__getattr__(attr)
-    except AttributeError:
-        return default_value
-
-
-def get_attr_or_none(entity, attr):
-    """Return the attr value of entity or None."""
-    return get_attr_or_default(entity, attr, None)
-
-
 def str_to_bool(string):
     """Convert xs::boolean to python bool."""
     if not string:
@@ -76,21 +63,21 @@ def parse_executable(entity: Entity):
     """Parse executable tag."""
     cmd = entity.cmd
     print(cmd)
-    cwd = get_attr_or_none(entity, 'cwd')
-    name = get_attr_or_none(entity, 'name')
-    shell = str_to_bool(get_attr_or_none(entity, 'shell'))
-    prefix = get_attr_or_none(entity, 'launch-prefix')
-    output = get_attr_or_none(entity, 'output')
-    args = get_attr_or_none(entity, 'args')
+    cwd = getattr(entity, 'cwd', None)
+    name = getattr(entity, 'name', None)
+    shell = str_to_bool(getattr(entity, 'shell', None))
+    prefix = getattr(entity, 'launch-prefix', None)
+    output = getattr(entity, 'output', None)
+    args = getattr(entity, 'args', None)
     print(args)
     args = args.split(' ') if args else []
     if not type(args) == list:
         args = [args]
     print(args)
     env = get_dictionary_from_key_value_pairs(
-        filtrate_with_predicates(get_attr_or_none(entity, 'env')))
-    if_predicate = get_attr_or_none(entity, 'if')
-    unless_predicate = get_attr_or_none(entity, 'unless')
+        filtrate_with_predicates(getattr(entity, 'env', None)))
+    if_predicate = getattr(entity, 'if', None)
+    unless_predicate = getattr(entity, 'unless', None)
 
     cmd_list = [cmd]
     print(cmd_list)
@@ -177,28 +164,18 @@ def parse_node(entity: Entity):
     """Parse node tag."""
     package = entity.package
     executable = entity.executable
-    name = get_attr_or_none(entity, 'name')
-    ns = get_attr_or_none(entity, 'ns')
-    prefix = get_attr_or_none(entity, 'launch-prefix')
-    output = get_attr_or_none(entity, 'output')
-    args = get_attr_or_none(entity, 'args')
+    name = getattr(entity, 'name', None)
+    ns = getattr(entity, 'ns', None)
+    prefix = getattr(entity, 'launch-prefix', None)
+    output = getattr(entity, 'output', None)
+    args = getattr(entity, 'args', None)
     args = args.split(' ') if args else None
-    env = get_dictionary_from_key_value_pairs(
-        filtrate_with_predicates(get_attr_or_none(entity, 'env')))
+    env = dict(
+        filtrate_with_predicates(getattr(entity, 'env', None)))
     remappings = get_remap_rules_from_remap_list(
-        get_attr_or_none(entity, 'remap'))
-    parameters = normalize_parameters(get_attr_or_none(entity, 'param'))
+        getattr(entity, 'remap', None))
+    parameters = normalize_parameters(getattr(entity, 'param', None))
     # TODO(ivanpauno): Handle if and unless attributes.
-    print(package)
-    print(executable)
-    print(name)
-    print(ns)
-    print(prefix)
-    print(output)
-    print(args)
-    print(env)
-    print(remappings)
-    print(parameters)
 
     return launch_ros.actions.Node(
         package=package,
