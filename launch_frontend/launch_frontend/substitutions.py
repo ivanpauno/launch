@@ -22,6 +22,7 @@ from launch.substitutions import FindExecutable
 
 
 def test(data):
+    """Delete me please."""
     if len(data) > 1:
         raise AttributeError('Expected a len 1 list')
     return data[0]
@@ -55,6 +56,7 @@ def parse_env(data):
     return EnvironmentVariable(name, default_value=default)
 
 
+# Dictionary, where the substitution parsing functions are registered.
 substitution_functions_dict = {
     'test': test,
     'list': parse_list,
@@ -67,10 +69,14 @@ def parse_substitutions(string):
     # of the opening brackets. When it finds a closing bracket
     # it pops and substitute.
     # The output is a list of substitutions and strings.
-    subst_list = []
-    pos = 0
-    opening_brackets_pile = []
-    last_substitution = dict({})
+    subst_list = []  # Substitutions list to be returned.
+    pos = 0  # Position of the string when we should continue parsing.
+    opening_brackets_pile = []  # Pile containing opening brackets.
+    # A dict, containing the nested substitutions that have been done.
+    # The key is the nesting level.
+    # Each item is a list, in order to handle substitutions that takes
+    # more than one argument, like $(env var default).
+    nested_substitutions = dict({})
     while 1:
         ob = string.find('$(', pos)
         cb = string.find(')', pos)
@@ -86,12 +92,11 @@ def parse_substitutions(string):
                         opening_brackets_pile[-1]:ob].split(' ', 1)
                 if middle_string:
                     try:
-                        last_substitution[opening_brackets_pile[-1]].append(
+                        nested_substitutions[len(opening_brackets_pile)-1].append(
                             middle_string)
                     except (TypeError, KeyError):
-                        last_substitution[len(opening_brackets_pile)-1] = \
+                        nested_substitutions[len(opening_brackets_pile)-1] = \
                             [middle_string]
-                print(middle_string)
             opening_brackets_pile.append(ob)
             pos = ob + 2
             continue
@@ -103,32 +108,34 @@ def parse_substitutions(string):
                 # Unknown substitution
                 raise RuntimeError(
                     'Invalid substitution type: {}'.format(subst_key))
-            if len(opening_brackets_pile)+1 not in last_substitution:
+            if len(opening_brackets_pile)+1 not in nested_substitutions:
                 # Doesn't have a nested substitution inside.
                 try:
-                    last_substitution[len(opening_brackets_pile)].append(
+                    nested_substitutions[len(opening_brackets_pile)].append(
                         substitution_functions_dict[subst_key]([subst_value]))
                 except (TypeError, KeyError):
-                    last_substitution[len(opening_brackets_pile)] = \
+                    nested_substitutions[len(opening_brackets_pile)] = \
                         [substitution_functions_dict[subst_key]([subst_value])]
             else:
                 # Have a nested substitution inside
                 try:
-                    last_substitution[len(opening_brackets_pile)].append(
+                    nested_substitutions[len(opening_brackets_pile)].append(
                         substitution_functions_dict[subst_key](
-                            last_substitution[len(opening_brackets_pile)+1]))
+                            nested_substitutions[len(opening_brackets_pile)+1])
+                    )
                 except (TypeError, KeyError):
-                    last_substitution[len(opening_brackets_pile)] = \
-                        [substitution_functions_dict[subst_key](
-                            last_substitution[len(opening_brackets_pile)+1])]
-                del last_substitution[len(opening_brackets_pile)+1]
+                    nested_substitutions[len(opening_brackets_pile)] = [
+                        substitution_functions_dict[subst_key](
+                            nested_substitutions[len(opening_brackets_pile)+1])
+                    ]
+                del nested_substitutions[len(opening_brackets_pile)+1]
             if not opening_brackets_pile:
                 # Is not nested inside other substitution
                 subst_list.append(string[:ob_pop])
-                subst_list.extend(last_substitution[0])
+                subst_list.extend(nested_substitutions[0])
                 string = string[cb+1:]
                 pos = 0
-                last_substitution = dict({})
+                nested_substitutions = dict({})
             else:
                 # Is still nested in other substitution
                 pos = cb + 1
@@ -139,4 +146,6 @@ def parse_substitutions(string):
 
 
 if __name__ == '__main__':
-    print(parse_substitutions('hola $(test como) $(test $(list 1,2,3)) $(env ads bsd)'))
+    print(parse_substitutions(
+        'hola $(test como) $(test $(list 1,2,3))'
+        ' $(env $(env jkl $(test msj)) bsd)'))
